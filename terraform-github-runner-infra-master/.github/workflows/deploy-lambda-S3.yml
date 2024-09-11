@@ -1,0 +1,52 @@
+name: 'Build and upload to S3 Bucket'
+
+on:
+  workflow_dispatch:
+    inputs:
+      account_id:
+        description: 'AWS account ID (Cloud2)'
+        required: true
+        type: string
+        default: "451656060983"
+      S3_bucket:
+        description: 'S3 bucket name to copy the lambda zip file'
+        required: true
+        type: string
+        default: "amptfc-ccoe-pilot"
+env:
+  AWS_S3_BUCKET_NAME: 'amptfc-ccoe-pilot'
+jobs:
+  Build_and_Upload_runner:
+    runs-on: [self-hosted, pilot]
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Generate Tag Version'
+        id: generate_tag_version
+        run: |
+          TAG=$(date +%Y%m%d)-$(date +%H%M%S)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Tag Version: $TAG" >> $GITHUB_STEP_SUMMARY
+    
+      - name: 'Create Zip File'
+        id: 'create_package'
+        run: |
+          PACKAGE_NAME="runner.zip"
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          cd lambdas/functions/runner && zip -r $PACKAGE_NAME .
+
+
+      - name: 'Upload to S3 Bucket'
+        run: |
+          cd lambdas/functions/runner && aws s3 cp ${{ steps.create_package.outputs.package_name }} s3://${{ env.AWS_S3_BUCKET_NAME }}
+
+
+      - uses: actions/github-script@v6
+        name: 'Create Git Tag'
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.generate_tag_version.outputs.tag }}',
+              sha: context.sha
+            })

@@ -1,0 +1,12 @@
+{
+    "include": [
+        {"name": "requests", "version": "2.32.3"},
+        {"name": "aws_lambda_powertools", "version": "2.43.1"},
+        {"name": "pyjwt", "version": "2.3.0"},
+        {"name": "pyjwt[crypto]", "version": "2.3.0"},
+        {"name": "cryptography", "version": "43.0.0"},
+        {"name": "fastjsonschema", "version": "2.20.0"},
+        {"name": "aws_xray_sdk", "version": "2.14.0"},
+        {"name": "PyGithub", "version": "2.4.0"}
+    ]
+}

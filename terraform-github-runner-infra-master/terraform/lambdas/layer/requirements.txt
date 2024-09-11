@@ -1,0 +1,8 @@
+requests
+aws_lambda_powertools
+pyjwt
+pyjwt[crypto]
+cryptography
+fastjsonschema
+aws_xray_sdk
+PyGithub

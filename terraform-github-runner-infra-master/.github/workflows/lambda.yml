@@ -1,0 +1,73 @@
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [ccoe]
+    env:
+      AWS_REGION: "ap-southeast-2"
+      CloudFormationAdminRole: ccoe-gha-assumable-role-ap-southeast-2
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4 
+        with:
+          python-version: 3.12
+
+      - name: install dependencies
+        run: pip install -r lambdas/requirements.txt
+
+      - name: Build Lambda function
+        run: |
+          zip -r function.zip lambdas/
+
+      - name: Upload Lambda function
+        run: |
+          aws lambda create-function --function-name my-function \
+          --zip-file fileb://function.zip \
+          --handler webhook.handler \
+          --runtime python3.12 \
+          --role arn:aws:iam::451656060983:role/my-test-lambda-role
+      # - name: assume-role-profile
+      #   run: |
+      #     set -e
+      #     assume_role=$(aws sts assume-role --role-arn arn:aws:iam::451656060983:role/${{ env.CloudFormationAdminRole }} --role-session-name dcmrolesession-451656060983);\
+      #     aws configure set aws_access_key_id $(echo $assume_role | jq -r '.Credentials''.AccessKeyId') --profile dcmrolesession-451656060983;\
+      #     aws configure set aws_secret_access_key $(echo $assume_role | jq -r '.Credentials''.SecretAccessKey') --profile dcmrolesession-451656060983;\
+      #     aws configure set aws_session_token $(echo $assume_role | jq -r '.Credentials''.SessionToken') --profile dcmrolesession-451656060983;\
+      #     aws configure set default.region ap-southeast-2 --profile dcmrolesession-451656060983;
+
+      # - uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #       assume
+      #       aws-region: ap-southeast-2
+
+      # - name: Deploy Lambda function
+      #   uses: aws-actions/create-or-update-lambda-function@v1
+      #   with:
+      #     name: my-lambda-function
+      #     runtime: python3.12
+      #     code: ./function.zip
+      #     # handler: index.lambda_handler
+      #     # Other configuration options
+
+      # - name: Create GitHub Release
+      #   id: create-release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: 1.0.0
+      #     release_name: ${{ github.ref }}
+      #     body: This is the release body
+
+      # - name: Upload Lambda function as Release Asset
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: lambda-function
+      #     path: function.zip
+      #     if-exists: replace
+      #     upload_url: ${{ steps.create-release.outputs.upload_url }}

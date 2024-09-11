@@ -1,0 +1,28 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+          "Effect": "Allow",
+          "Action": [
+              "ssm:GetParameter",
+              "ssm:GetParametersByPath"
+          ],
+          "Resource": [
+                "${github_app_webhook_secret_arn}",
+                "${github_app_id_arn}",
+                "${github_app_private_key_arn}",
+                "${gha_runner_image_name_arn}"
+          ]
+      },
+      {
+            "Effect": "Allow",
+            "Action": [
+                "ecs:RunTask",
+                "ecs:DescribeTasks"
+            ],
+            "Resource": [
+                    "${lambda_role_ecs_task_permission}"
+            ]
+      }
+    ]
+  }

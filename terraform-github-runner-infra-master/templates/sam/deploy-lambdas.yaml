@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Runtime:
+    Type: String
+    Default: python3.12
+  EmailAddress:
+    Type: String
+    Description: Email address to receive alerts
+    Default: pradip_k_kro@amp.com.au
+
+Resources:
+  ghaEphemeralLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: ../../terraform/lambdas/layer
+      CompatibleRuntimes: 
+        - !Ref Runtime
+    Metadata:
+      BuildMethod: !Ref Runtime
+
+  # webhookLambdafunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     FunctionName: webhookpoc
+  #     CodeUri: ../../lambdas/functions/webhook
+  #     Handler: lambda.handler
+  #     Runtime: !Ref Runtime
+  #     MemorySize: 128
+  #     Timeout: 10
+  #     Layers:
+  #       - !Ref githubrunnerlayer
+  #     Policies:
+  #     - Statement:
+  #       - Sid: SSMGetParameterPolicy
+  #         Effect: Allow
+  #         Action:
+  #         - ssm:GetParameters
+  #         - ssm:GetParameter
+  #         - ssm:GetParametersByPath
+  #         Resource: '*'
+  #       - Sid: SQSSendMessagePolicy
+  #         Effect: Allow
+  #         Action:
+  #         - sqs:SendMessage
+  #         - sqs:GetQueueAttributes
+  #         Resource: arn:aws:sqs:ap-southeast-2:451656060983:github-actions-queued-builds
+  #     # add resource based policy
+  # ApiGatewayPermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     Action: 'lambda:InvokeFunction'
+  #     FunctionName: !GetAtt webhookLambdafunction.Arn
+  #     Principal: apigateway.amazonaws.com
+  #     SourceArn: "arn:aws:apigateway:ap-southeast-2::/apis/b0lv55z3fc"
+
+
+
+  # taskcreatorfunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     FunctionName: taskcreatorpoc
+  #     CodeUri: ../../terraform/lambdas/functions/runner
+  #     Handler: lambda.handler
+  #     Runtime: !Ref Runtime
+  #     MemorySize: 128
+  #     Timeout: 10
+  #     Layers:
+  #       - !Ref githubrunnerlayer
+  #     Policies:
+  #     - Statement:
+  #       - Sid: SSMGetParameterPolicy
+  #         Effect: Allow
+  #         Action:
+  #         - ssm:GetParameters
+  #         - ssm:GetParameter
+  #         - ssm:GetParametersByPath
+  #         Resource: '*'
+  #       - Sid: GetSQSMessagePolicy
+  #         Effect: Allow
+  #         Action:
+  #         - sqs:ReceiveMessage
+  #         - sqs:DeleteMessage
+  #         - sqs:GetQueueAttributes
+  #         Resource: arn:aws:sqs:ap-southeast-2:451656060983:github-actions-queued-builds

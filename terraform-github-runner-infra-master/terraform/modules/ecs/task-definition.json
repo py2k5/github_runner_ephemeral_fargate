@@ -1,0 +1,36 @@
+{
+    "name" : "",
+    "image" : "",
+    "cpu" : 1024,
+    "memory" : 4096,
+    "command": [
+              "./ephemeral_runner.sh"
+          ],
+    "environment" : [
+      {
+          "name": "WORKFLOW_NAME",
+          "value": ""
+      },
+      {
+          "name": "LABELS",
+          "value": ""
+      },
+      {
+          "name": "REG_TOKEN",
+          "value": ""
+      },
+      {
+          "name": "GITHUB_ORG",
+          "value": ""
+      }
+    ],
+    "logConfiguration" : {
+      "logDriver" : "awslogs",
+      "options" : {
+        "awslogs-create-group" : "true",
+        "awslogs-group" : "/ecs/ccoe-github-actions-runner",
+        "awslogs-region" : "ap-southeast-2",
+        "awslogs-stream-prefix" : "ecs"
+      }
+    }
+  }

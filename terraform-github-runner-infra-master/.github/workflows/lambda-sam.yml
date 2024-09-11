@@ -1,0 +1,54 @@
+name: deploy lambda layer
+on:
+  workflow_dispatch:
+    inputs:
+      account_id:
+        description: 'AWS account ID (Cloud2)'
+        required: true
+        type: string
+        default: "451656060983"
+
+env:
+  CentralGhaRole: ccoe-gha-assumable-role-ap-southeast-2
+  TEMPLATE_FILE: "./templates/sam/deploy-lambdas.yaml"
+  ACCOUNT_ID: "451656060983"
+
+jobs:
+  deploy_lambda:
+    name: Deploy webhook Lambda
+    runs-on: [self-hosted, ccoe, pilot]
+    steps:
+      - name: Checkout the Repository 
+        uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: setup sam
+        uses: aws-actions/setup-sam@v1
+
+      - name: install-awscli-boto3
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          which awscliv2 || python3 -m pip install awscliv2 --user
+          which boto3 || python3 -m pip install boto3 --user
+          aws sts get-caller-identity          
+          aws configure list
+          
+      
+      - name: Execute script
+        run: |
+          run: |
+          set -e
+          STACK_NAME="github-runner-stack"
+    
+          echo "--------- Deploying Lambda ---------";
+          sam build --debug --template-file $TEMPLATE_FILE
+          sam package --resolve-s3 --output-template-file packaged-template.yaml
+          sam deploy -t packaged-template.yaml \
+                      --stack-name $STACK_NAME \
+                      --capabilities CAPABILITY_IAM \
+                      --resolve-s3 \
+                      --tags "Name"="github-runner" "ApplicationName"="github-runner-app"
